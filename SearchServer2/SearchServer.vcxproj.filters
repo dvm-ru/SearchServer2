@@ -14,29 +14,49 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Файлы заголовков\testmain">
-      <UniqueIdentifier>{e4be4527-f45d-4d49-b475-45ffaf1262dc}</UniqueIdentifier>
+      <UniqueIdentifier>{3996b127-6aa6-4cc3-bcf3-fe1a0fbd6087}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="document.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="read_input_functions.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="request_queue.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="search_server.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="string_processing.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="utility.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="test_example_functions.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="remove_duplicates.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="process_queries.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="document.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="log_duration.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="log_duration_My.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="paginator.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="process_queries.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="read_input_functions.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="remove_duplicates.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="request_queue.h">
@@ -51,61 +71,41 @@
     <ClInclude Include="utility.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="log_duration_My.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="test_example_functions.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="remove_duplicates.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="process_queries.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="log_duration.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
     <ClInclude Include="benchmark_MatchDocument.h">
-      <Filter>Файлы заголовков\testmain</Filter>
-    </ClInclude>
-    <ClInclude Include="benchmark_ProcessQueries.h">
-      <Filter>Файлы заголовков\testmain</Filter>
-    </ClInclude>
-    <ClInclude Include="task_1_of_3_RemoveDocument.h">
       <Filter>Файлы заголовков\testmain</Filter>
     </ClInclude>
     <ClInclude Include="task_2_of_3_MatchDocument.h">
       <Filter>Файлы заголовков\testmain</Filter>
     </ClInclude>
-    <ClInclude Include="task_ProcessQueries.h">
+    <ClInclude Include="task_1_of_3_RemoveDocument.h">
       <Filter>Файлы заголовков\testmain</Filter>
     </ClInclude>
     <ClInclude Include="task_ProcessQueriesJoined.h">
       <Filter>Файлы заголовков\testmain</Filter>
     </ClInclude>
+    <ClInclude Include="task_ProcessQueries.h">
+      <Filter>Файлы заголовков\testmain</Filter>
+    </ClInclude>
     <ClInclude Include="task_RemoveDuplicates.h">
       <Filter>Файлы заголовков\testmain</Filter>
     </ClInclude>
-    <ClInclude Include="test_example_functions.h">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="benchmark_ProcessQueries.h">
+      <Filter>Файлы заголовков\testmain</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="utility.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="test_example_functions.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="string_processing.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="search_server.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="request_queue.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="remove_duplicates.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="read_input_functions.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="process_queries.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="document.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
