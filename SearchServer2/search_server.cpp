@@ -178,6 +178,9 @@ SearchServer::Query SearchServer::ParseQuery(const std::string_view text) const 
     auto last = std::unique(words.begin(), words.end());
     words.erase(last, words.end());
 
+    result.minus_words.reserve(words.size());
+    result.plus_words.reserve(words.size());
+
     for (const auto& word : words) {
         const auto query_word = ParseQueryWord(word);
         if (!query_word.is_stop) {
@@ -209,6 +212,9 @@ SearchServer::Query SearchServer::ParseQuery(const std::execution::sequenced_pol
     auto last = std::unique(seq, words.begin(), words.end());
     words.erase(last, words.end());
 
+    result.minus_words.reserve(words.size());
+    result.plus_words.reserve(words.size());
+
     for (const auto& word : words) {
         const auto query_word = ParseQueryWord(word);
         if (!query_word.is_stop) {
@@ -239,6 +245,9 @@ SearchServer::Query SearchServer::ParseQuery(const std::execution::parallel_poli
     std::sort(par, words.begin(), words.end());
     auto last = std::unique(par, words.begin(), words.end());
     words.erase(last, words.end());
+
+    result.minus_words.reserve(words.size());
+    result.plus_words.reserve(words.size());
 
     for (const auto& word : words) {
         const auto query_word = ParseQueryWord(word);
