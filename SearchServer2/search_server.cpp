@@ -236,8 +236,8 @@ SearchServer::Query SearchServer::ParseQuery(const std::execution::parallel_poli
     Query result;
     std::vector<std::string_view> words = SplitIntoWords(text);
 
-    std::sort(par, words.begin(), words.end());
-    auto last = std::unique(par, words.begin(), words.end());
+    std::sort(seq, words.begin(), words.end());
+    auto last = std::unique(seq, words.begin(), words.end());
     words.erase(last, words.end());
 
     for (const auto& word : words) {
@@ -262,6 +262,26 @@ SearchServer::Query SearchServer::ParseQuery(const std::execution::parallel_poli
 
     return result;
 }
+
+SearchServer::Query SearchServer::ParseQuery(const std::execution::parallel_policy& par, std::string_view text) const {
+    Query result;
+    std::vector<std::string_view> words = SplitIntoWords(text);
+
+    //std::sort(par, words.begin(), words.end());
+    //auto last = std::unique(par, words.begin(), words.end());
+    //words.erase(last, words.end());
+
+    for (const auto& word : words) {
+        const auto query_word = ParseQueryWord(word);
+        if (!query_word.is_stop) {
+            if (query_word.is_minus) {
+                result.minus_words.push_back(query_word.data);
+            }
+            else {
+                result.plus_words.push_back(query_word.data);
+            }
+        }
+    }
 
 //double SearchServer::ComputeWordInverseDocumentFreq(const std::string& word) const {
 //    return log(GetDocumentCount() * 1.0 / word_to_document_freqs_.at(word).size());

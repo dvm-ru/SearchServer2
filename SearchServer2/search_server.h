@@ -166,6 +166,7 @@ inline SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::
     auto it = std::unique(seq, matched_words.begin(), last);
     matched_words.erase(it, matched_words.end());
 
+    matched_words.erase(last, matched_words.end());
     return { matched_words, documents_.at(document_id).status };
 }
 
