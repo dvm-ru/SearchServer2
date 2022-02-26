@@ -44,11 +44,10 @@ size_t SearchServer::GetDocumentCount() const {
 }
 
 SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::string& raw_query, int document_id) const {
-
     const auto query = ParseQuery(raw_query);
 
     std::vector<std::string> matched_words;
-    for (const auto& word : query.plus_words) {
+    for (const std::string& word : query.plus_words) {
         if (word_to_document_freqs_.count(word) == 0) {
             continue;
         }
@@ -56,7 +55,7 @@ SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::string&
             matched_words.push_back(word);
         }
     }
-    for (const auto& word : query.minus_words) {
+    for (const std::string& word : query.minus_words) {
         if (word_to_document_freqs_.count(word) == 0) {
             continue;
         }
@@ -65,11 +64,6 @@ SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::string&
             break;
         }
     }
-
-    //std::sort(matched_words.begin(), matched_words.end());
-    //auto last = std::unique(matched_words.begin(), matched_words.end());
-    //matched_words.erase(last, matched_words.end());
-
     return { matched_words, documents_.at(document_id).status };
 }
 
@@ -174,9 +168,9 @@ SearchServer::Query SearchServer::ParseQuery(const std::string_view text) const 
     Query result;
     std::vector<std::string_view> words = SplitIntoWords(text);
 
-    std::sort(words.begin(), words.end());
-    auto last = std::unique(words.begin(), words.end());
-    words.erase(last, words.end());
+    //std::sort(words.begin(), words.end());
+    //auto last = std::unique(words.begin(), words.end());
+    //words.erase(last, words.end());
 
     result.minus_words.reserve(words.size());
     result.plus_words.reserve(words.size());
@@ -208,9 +202,9 @@ SearchServer::Query SearchServer::ParseQuery(const std::execution::sequenced_pol
     Query result;
     std::vector<std::string_view> words = SplitIntoWords(text);
 
-    std::sort(seq, words.begin(), words.end());
-    auto last = std::unique(seq, words.begin(), words.end());
-    words.erase(last, words.end());
+    //std::sort(seq, words.begin(), words.end());
+    //auto last = std::unique(seq, words.begin(), words.end());
+    //words.erase(last, words.end());
 
     result.minus_words.reserve(words.size());
     result.plus_words.reserve(words.size());
@@ -242,9 +236,9 @@ SearchServer::Query SearchServer::ParseQuery(const std::execution::parallel_poli
     Query result;
     std::vector<std::string_view> words = SplitIntoWords(text);
 
-    std::sort(par, words.begin(), words.end());
-    auto last = std::unique(par, words.begin(), words.end());
-    words.erase(last, words.end());
+    //std::sort(par, words.begin(), words.end());
+    //auto last = std::unique(par, words.begin(), words.end());
+    //words.erase(last, words.end());
 
     result.minus_words.reserve(words.size());
     result.plus_words.reserve(words.size());
