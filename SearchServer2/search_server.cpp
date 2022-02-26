@@ -1,4 +1,4 @@
-#include "search_server.h"
+п»ї#include "search_server.h"
 #include "string_processing.h"
 
 #include <execution>
@@ -44,7 +44,7 @@ size_t SearchServer::GetDocumentCount() const {
 }
 
 SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::string& raw_query, int document_id) const {
-    
+
     const auto query = ParseQuery(raw_query);
 
     std::vector<std::string> matched_words;
@@ -81,7 +81,7 @@ std::set<int>::const_iterator SearchServer::end() {
     return document_ids_.end();
 }
 
-//Метод получения частот слов по id документа
+//ГЊГҐГІГ®Г¤ ГЇГ®Г«ГіГ·ГҐГ­ГЁГї Г·Г Г±ГІГ®ГІ Г±Г«Г®Гў ГЇГ® id Г¤Г®ГЄГіГ¬ГҐГ­ГІГ 
 const std::map<std::string, double>& SearchServer::GetWordFrequencies(int document_id) const {
     if (doc_id_to_words_freqs_.count(document_id)) {
         return doc_id_to_words_freqs_.at(document_id);
@@ -90,7 +90,7 @@ const std::map<std::string, double>& SearchServer::GetWordFrequencies(int docume
     return dummy_;
 }
 
-//Метод удаления документов из поискового сервера
+//ГЊГҐГІГ®Г¤ ГіГ¤Г Г«ГҐГ­ГЁГї Г¤Г®ГЄГіГ¬ГҐГ­ГІГ®Гў ГЁГ§ ГЇГ®ГЁГ±ГЄГ®ГўГ®ГЈГ® Г±ГҐГ°ГўГҐГ°Г 
 void SearchServer::RemoveDocument(int document_id) {
     RemoveDocument(std::execution::seq, document_id);
 }
@@ -110,8 +110,8 @@ void SearchServer::RemoveDocument(const std::execution::sequenced_policy&, int d
     }
 }
 
-////Вы можете столкнуться с тем, что нужный алгоритм не параллелится, когда передаёте в него итераторы не произвольного доступа.
-//Попробуйте переложить нужные элементы в вектор и запустить алгоритм для него.
+////Г‚Г» Г¬Г®Г¦ГҐГІГҐ Г±ГІГ®Г«ГЄГ­ГіГІГјГ±Гї Г± ГІГҐГ¬, Г·ГІГ® Г­ГіГ¦Г­Г»Г© Г Г«ГЈГ®Г°ГЁГІГ¬ Г­ГҐ ГЇГ Г°Г Г«Г«ГҐГ«ГЁГІГ±Гї, ГЄГ®ГЈГ¤Г  ГЇГҐГ°ГҐГ¤Г ВёГІГҐ Гў Г­ГҐГЈГ® ГЁГІГҐГ°Г ГІГ®Г°Г» Г­ГҐ ГЇГ°Г®ГЁГ§ГўГ®Г«ГјГ­Г®ГЈГ® Г¤Г®Г±ГІГіГЇГ .
+//ГЏГ®ГЇГ°Г®ГЎГіГ©ГІГҐ ГЇГҐГ°ГҐГ«Г®Г¦ГЁГІГј Г­ГіГ¦Г­Г»ГҐ ГЅГ«ГҐГ¬ГҐГ­ГІГ» Гў ГўГҐГЄГІГ®Г° ГЁ Г§Г ГЇГіГ±ГІГЁГІГј Г Г«ГЈГ®Г°ГЁГІГ¬ Г¤Г«Гї Г­ГҐГЈГ®.
 void SearchServer::RemoveDocument(const std::execution::parallel_policy& police, int document_id) {
     if (!documents_.count(document_id)) return;
     const auto& word_freqs = doc_id_to_words_freqs_.at(document_id);
@@ -236,8 +236,8 @@ SearchServer::Query SearchServer::ParseQuery(const std::execution::parallel_poli
     Query result;
     std::vector<std::string_view> words = SplitIntoWords(text);
 
-    std::sort(seq, words.begin(), words.end());
-    auto last = std::unique(seq, words.begin(), words.end());
+    std::sort(par, words.begin(), words.end());
+    auto last = std::unique(par, words.begin(), words.end());
     words.erase(last, words.end());
 
     for (const auto& word : words) {
@@ -263,30 +263,9 @@ SearchServer::Query SearchServer::ParseQuery(const std::execution::parallel_poli
     return result;
 }
 
-SearchServer::Query SearchServer::ParseQuery(const std::execution::parallel_policy& par, std::string_view text) const {
-    Query result;
-    std::vector<std::string_view> words = SplitIntoWords(text);
-
-    //std::sort(par, words.begin(), words.end());
-    //auto last = std::unique(par, words.begin(), words.end());
-    //words.erase(last, words.end());
-
-    for (const auto& word : words) {
-        const auto query_word = ParseQueryWord(word);
-        if (!query_word.is_stop) {
-            if (query_word.is_minus) {
-                result.minus_words.push_back(query_word.data);
-            }
-            else {
-                result.plus_words.push_back(query_word.data);
-            }
-        }
-    }
-
 //double SearchServer::ComputeWordInverseDocumentFreq(const std::string& word) const {
 //    return log(GetDocumentCount() * 1.0 / word_to_document_freqs_.at(word).size());
 //}
 double SearchServer::ComputeWordInverseDocumentFreq(const std::string_view word) const {
     return log(GetDocumentCount() * 1.0 / word_to_document_freqs_.at(static_cast<std::string>(word)).size());
 }
-

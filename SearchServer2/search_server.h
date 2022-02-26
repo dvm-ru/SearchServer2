@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include <algorithm>
 #include <string>
@@ -54,7 +54,7 @@ public:
     size_t GetDocumentCount() const;
 
 
-    /// Поиск документов по словам запроса
+    /// ГЏГ®ГЁГ±ГЄ Г¤Г®ГЄГіГ¬ГҐГ­ГІГ®Гў ГЇГ® Г±Г«Г®ГўГ Г¬ Г§Г ГЇГ°Г®Г±Г 
     using MatchDocumentResult = std::tuple<std::vector<std::string>, DocumentStatus>;
     MatchDocumentResult MatchDocument(const std::string& raw_query, int document_id) const;
     MatchDocumentResult MatchDocument(const std::execution::sequenced_policy&, const std::string_view raw_query, int document_id) const;
@@ -65,7 +65,7 @@ public:
 
     const std::map<std::string, double>& GetWordFrequencies(int document_id) const;
 
-    // метод удаления документов из поискового сервера
+    // Г¬ГҐГІГ®Г¤ ГіГ¤Г Г«ГҐГ­ГЁГї Г¤Г®ГЄГіГ¬ГҐГ­ГІГ®Гў ГЁГ§ ГЇГ®ГЁГ±ГЄГ®ГўГ®ГЈГ® Г±ГҐГ°ГўГҐГ°Г 
     void RemoveDocument(int document_id);
     void RemoveDocument(const std::execution::sequenced_policy&, int document_id);
     void RemoveDocument(const std::execution::parallel_policy&, int document_id);
@@ -166,7 +166,6 @@ inline SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::
     auto it = std::unique(seq, matched_words.begin(), last);
     matched_words.erase(it, matched_words.end());
 
-    matched_words.erase(last, matched_words.end());
     return { matched_words, documents_.at(document_id).status };
 }
 
