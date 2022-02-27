@@ -89,20 +89,20 @@ int benchmark_MatchDocument() {
     const auto documents = GenerateQueries(generator, dictionary, 10'000, 70);
     const string query = GenerateQuery(generator, dictionary, 500, 0.1);
 
-    /*   SearchServer search_server("and with"s);
-       const string query = "curly and funny -not"s;
-       int id = 0;
-       for (
-           const string& text : {
-               "funny pet and nasty rat"s,
-               "funny pet with curly hair"s,
-               "funny pet and not very nasty rat"s,
-               "pet with rat and rat and rat"s,
-               "nasty rat with curly hair"s,
-           }
-           ) {
-           search_server.AddDocument(++id, text, DocumentStatus::ACTUAL, { 1, 2 });
-       }*/
+	//SearchServer search_server("and with"s);
+	//const string query = "curly and funny -not"s;
+	//int id = 0;
+	//for (
+	//	const string& text : {
+	//		"funny pet and nasty rat"s,
+	//		"funny pet with curly hair"s,
+	//		"funny pet and not very nasty rat"s,
+	//		"pet with rat and rat and rat"s,
+	//		"nasty rat with curly hair"s,
+	//	}
+	//	) {
+	//	search_server.AddDocument(id++, text, DocumentStatus::ACTUAL, { 1, 2 });
+	//}
 
     SearchServer search_server(dictionary[0]);
     for (size_t i = 0; i < documents.size(); ++i) {

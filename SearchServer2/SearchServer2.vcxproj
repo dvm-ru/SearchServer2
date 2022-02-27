@@ -158,6 +158,7 @@
     <ClInclude Include="task_ProcessQueriesJoined.h" />
     <ClInclude Include="task_RemoveDuplicates.h" />
     <ClInclude Include="test_example_functions.h" />
+    <ClInclude Include="test_strings.h" />
     <ClInclude Include="utility.h" />
   </ItemGroup>
   <ItemGroup>

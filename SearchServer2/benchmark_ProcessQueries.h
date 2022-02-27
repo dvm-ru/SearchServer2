@@ -63,7 +63,7 @@ vector<string> GenerateQueries_for_benchmark_ProcessQueries(mt19937 & generator,
 }
 
 template <typename QueriesProcessor>
-void Test_for_benchmark_ProcessQueries(string_view mark, QueriesProcessor processor, const SearchServer& search_server, const vector<string>&queries) {
+void Test_for_benchmark_ProcessQueries(string_view mark, QueriesProcessor processor, const SearchServer& search_server, const vector<string>& queries) {
     LOG_DURATION(mark);
     const auto documents_lists = processor(search_server, queries);
 }
@@ -85,7 +85,7 @@ int benchmark_ProcessQueries() {
     }
 
     const auto queries = GenerateQueries_for_benchmark_ProcessQueries(generator, dictionary, 2'000, 7);
-    TEST(ProcessQueries);
+    TEST(ProcessQueriesString);
 
     return 0;
 }

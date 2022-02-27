@@ -72,6 +72,7 @@
 #include "task_1_of_3_RemoveDocument.h"
 #include "task_2_of_3_MatchDocument.h"
 #include "benchmark_MatchDocument.h"
+#include "test_strings.h"
 
 
 
@@ -79,9 +80,11 @@ using namespace std::literals::string_literals;
 using namespace std;
 
 int main() {
+	
+	TestSearchServerStrings();
 
-	benchmark_MatchDocument();
-	task_2_of_3_MatchDocument();
+	//benchmark_MatchDocument();
+	//task_2_of_3_MatchDocument();
 
 	//task_1_of_3_RemoveDocument();
 
