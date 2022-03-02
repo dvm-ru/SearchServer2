@@ -158,15 +158,8 @@ inline SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::
         throw std::out_of_range("incorrect document id"s);
     }
 
-    const auto query = ParseQuery(raw_query);
+    const auto query = std::move(ParseQuery(raw_query));
 
-    if (std::any_of(seq, query.minus_words.begin(), query.minus_words.end(),
-        [this, document_id](const auto& word) {
-            return doc_id_to_words_freqs_.at(document_id).count(word);
-        })) {
-        return { {}, documents_.at(document_id).status };
-    }
-    ////Так вроде бы, быстрее:
     //std::set<std::string_view> mns{ query.minus_words.begin(),query.minus_words.end() };
     //if (std::find_if(
     //    seq,
@@ -176,16 +169,25 @@ inline SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::
     //) != mns.end()) {
     //    return { {}, documents_.at(document_id).status };
     //}
-
-    std::vector<std::string_view> matched_words(query.plus_words.size());
-
-    auto last = std::copy_if(
-        seq,
-        query.plus_words.begin(), query.plus_words.end(),
-        matched_words.begin(),
+    if (std::any_of(seq, query.minus_words.begin(), query.minus_words.end(),
         [this, document_id](const auto& word) {
             return doc_id_to_words_freqs_.at(document_id).count(word);
+        })) {
+        return { {}, documents_.at(document_id).status };
+    }
+
+    std::vector<std::string_view> matched_words(query.plus_words.size());
+    auto last = std::copy_if(
+        std::execution::seq,
+        std::make_move_iterator(query.plus_words.begin()), std::make_move_iterator(query.plus_words.end()),
+        matched_words.begin(),
+        [this, document_id](const auto word) {
+            return word_to_document_freqs_.at(word).count(document_id);
         });
+
+    std::sort(
+        std::execution::seq,
+        matched_words.begin(), last);
 
     std::sort(seq, matched_words.begin(), last);
     auto it = std::unique(seq, matched_words.begin(), last);
@@ -196,20 +198,13 @@ inline SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::
 
 inline SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::execution::parallel_policy& par, const std::string_view raw_query, int document_id) const
 {
-    if (!document_ids_.count(document_id)) {
+    if (document_ids_.count(document_id) == 0) {
         using namespace std::literals::string_literals;
-        throw std::out_of_range("incorrect document id"s);
+        throw std::out_of_range("document_id incorrect!"s);
     }
+    //const auto query = std::move(ParseQuery(par, raw_query));
+    const auto query = std::move(ParseQuery(raw_query, false));
 
-    const auto query = ParseQuery(raw_query);
-
-    if (std::any_of(par, query.minus_words.begin(), query.minus_words.end(),
-        [this, document_id](const auto& word) {
-            return doc_id_to_words_freqs_.at(document_id).count(word);
-        })) {
-        return { {}, documents_.at(document_id).status };
-    }
-    ////Так вроде бы, быстрее:
     //std::set<std::string_view> mns{ query.minus_words.begin(),query.minus_words.end() };
     //if (std::find_if(
     //    par,
@@ -219,16 +214,20 @@ inline SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::
     //) != mns.end()) {
     //    return { {}, documents_.at(document_id).status };
     //}
+    //Так вроде бы, быстрее:
+    if (std::any_of(par, std::make_move_iterator(query.minus_words.begin()), std::make_move_iterator(query.minus_words.end()),
+        [this, document_id](const auto& word) {
+            return doc_id_to_words_freqs_.at(document_id).count(word);
+        })) {
+        return { {}, documents_.at(document_id).status };
+    }
 
     std::vector<std::string_view> matched_words(query.plus_words.size());
-    auto last = std::copy_if(
-        par,
-        query.plus_words.begin(), query.plus_words.end(),
+    auto last = std::copy_if(par, std::make_move_iterator(query.plus_words.begin()), std::make_move_iterator(query.plus_words.end()),
         matched_words.begin(),
         [this, document_id](const auto& word) {
             return doc_id_to_words_freqs_.at(document_id).count(word);
         });
-
     std::sort(par, matched_words.begin(), last);
     auto it = std::unique(par, matched_words.begin(), last);
     matched_words.erase(it, matched_words.end());
