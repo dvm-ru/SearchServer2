@@ -85,7 +85,8 @@ int benchmark_ProcessQueries() {
     }
 
     const auto queries = GenerateQueries_for_benchmark_ProcessQueries(generator, dictionary, 2'000, 7);
-    TEST(ProcessQueriesString);
+    
+    TEST(ProcessQueries);
 
     return 0;
 }

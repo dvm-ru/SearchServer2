@@ -83,15 +83,15 @@ int main() {
 	
 	TestSearchServerStrings();
 
-	//benchmark_MatchDocument();
-	//task_2_of_3_MatchDocument();
+	benchmark_MatchDocument();
+	task_2_of_3_MatchDocument();
 
-	//task_1_of_3_RemoveDocument();
+	task_1_of_3_RemoveDocument();
 
-	//task_ProcessQueriesJoined();
+	task_ProcessQueriesJoined();
 
-	//benchmark_ProcessQueries();
-	//task_ProcessQueries();
+	benchmark_ProcessQueries();
+	task_ProcessQueries();
 
-	//task_RemoveDuplicates();
+	task_RemoveDuplicates();
 }

@@ -31,7 +31,7 @@ void SearchServer::AddDocument(int document_id, const std::string_view document,
 }
 
 std::vector<Document> SearchServer::FindTopDocuments(const std::string_view raw_query, DocumentStatus status) const {
-    return FindTopDocuments(raw_query, [status](int document_id, DocumentStatus document_status, int rating) {
+    return FindTopDocuments(raw_query, [&status](int document_id, DocumentStatus document_status, int rating) {
         return document_status == status;
         });
 }

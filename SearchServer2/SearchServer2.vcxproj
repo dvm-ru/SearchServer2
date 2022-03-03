@@ -142,6 +142,7 @@
   <ItemGroup>
     <ClInclude Include="benchmark_MatchDocument.h" />
     <ClInclude Include="benchmark_ProcessQueries.h" />
+    <ClInclude Include="concurrent_map.h" />
     <ClInclude Include="document.h" />
     <ClInclude Include="log_duration.h" />
     <ClInclude Include="log_duration_My.h" />

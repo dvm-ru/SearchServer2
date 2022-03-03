@@ -42,7 +42,7 @@ int task_ProcessQueriesJoined() {
         search_server.AddDocument(++id, text, DocumentStatus::ACTUAL, { 1, 2 });
     }
 
-    const vector<string_view> queries = {
+     vector<string> queries = {
         "nasty rat -not"s,
         "not very funny nasty pet"s,
         "curly hair"s

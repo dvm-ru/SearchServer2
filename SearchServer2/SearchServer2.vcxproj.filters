@@ -78,6 +78,9 @@
     <ClInclude Include="test_strings.h">
       <Filter>Файлы заголовков\testmain</Filter>
     </ClInclude>
+    <ClInclude Include="concurrent_map.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="utility.cpp">
