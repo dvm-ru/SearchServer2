@@ -10,8 +10,6 @@
 #include <execution>
 #include <mutex>
 
-#include <typeinfo>
-
 #include "document.h"
 #include "string_processing.h"
 
@@ -56,9 +54,13 @@ public:
 
     // Поиск документов по словам запроса
     using MatchDocumentResult = std::tuple<std::vector<std::string_view>, DocumentStatus>;
+
     MatchDocumentResult MatchDocument(const std::string_view raw_query, int document_id) const;
     MatchDocumentResult MatchDocument(const std::execution::sequenced_policy&, const std::string_view raw_query, int document_id) const;
     MatchDocumentResult MatchDocument(const std::execution::parallel_policy&, const std::string_view raw_query, int document_id) const;
+
+    template<typename ExecutionPolicy>
+    MatchDocumentResult MatchDocument(const ExecutionPolicy&& exec_policy, const std::string_view raw_query, int document_id) const;
 
     std::set<int>::const_iterator begin();
     std::set<int>::const_iterator end();
@@ -117,7 +119,12 @@ private:
 
     QueryWord ParseQueryWord(const std::string_view text) const;
 
-    Query ParseQuery(std::string_view text, const bool sort = true) const;
+    Query ParseQuery(const std::string_view text) const;
+    Query ParseQuery(const std::execution::sequenced_policy& policy, const std::string_view text) const;
+    Query ParseQuery(const std::execution::parallel_policy& policy, const std::string_view text) const;
+
+    template<typename ExecutionPolicy>
+    Query ParseQuery(const ExecutionPolicy&& exec_policy, const std::string_view text) const;
 
     double ComputeWordInverseDocumentFreq(const std::string_view word) const;
 
@@ -125,100 +132,15 @@ private:
     std::vector<Document> FindAllDocuments(ExecutionPolicy&& exec_policy, const Query& query, DocumentPredicate document_predicate) const;
 };
 
-inline SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::string_view raw_query, int document_id) const {
-    if (!documents_.count(document_id)) {
-        throw std::out_of_range("incorrect document_id");
-    }
-
-    const auto query = std::move(ParseQuery(raw_query));
-
-    std::vector<std::string_view> matched_words;
-
-    for (const auto word : query.minus_words) {
-        if (word_to_document_freqs_.count(word) == 0) {
-            continue;
-        }
-        if (word_to_document_freqs_.at(word).count(document_id)) {
-            return { {}, documents_.at(document_id).status };
-        }
-    }
-
-    for (const auto word : query.plus_words) {
-        if (word_to_document_freqs_.count(word) == 0) {
-            continue;
-        }
-        if (word_to_document_freqs_.at(word).count(document_id)) {
-            matched_words.push_back(word);
-        }
-    }
-    return { matched_words, documents_.at(document_id).status };
-}
-
-inline SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::execution::sequenced_policy& seq, const std::string_view raw_query, int document_id) const
-{
+template<typename ExecutionPolicy>
+inline SearchServer::MatchDocumentResult SearchServer::MatchDocument(const ExecutionPolicy&& exec_policy, const std::string_view raw_query, int document_id) const {
     if (!document_ids_.count(document_id)) {
-        using namespace std::literals::string_literals;
-        throw std::out_of_range("incorrect document id"s);
-    }
-
-    const auto query = std::move(ParseQuery(raw_query));
-
-    //std::set<std::string_view> mns{ query.minus_words.begin(),query.minus_words.end() };
-    //if (std::find_if(
-    //    seq,
-    //    mns.begin(), mns.end(),
-    //    [&](const auto& word) {
-    //        return doc_id_to_words_freqs_.at(document_id).count(word); }
-    //) != mns.end()) {
-    //    return { {}, documents_.at(document_id).status };
-    //}
-    if (std::any_of(seq, query.minus_words.begin(), query.minus_words.end(),
-        [this, document_id](const auto& word) {
-            return doc_id_to_words_freqs_.at(document_id).count(word);
-        })) {
-        return { {}, documents_.at(document_id).status };
-    }
-
-    std::vector<std::string_view> matched_words(query.plus_words.size());
-    auto last = std::copy_if(
-        std::execution::seq,
-        std::make_move_iterator(query.plus_words.begin()), std::make_move_iterator(query.plus_words.end()),
-        matched_words.begin(),
-        [this, document_id](const auto word) {
-            return word_to_document_freqs_.at(word).count(document_id);
-        });
-
-    std::sort(
-        std::execution::seq,
-        matched_words.begin(), last);
-
-    std::sort(seq, matched_words.begin(), last);
-    auto it = std::unique(seq, matched_words.begin(), last);
-    matched_words.erase(it, matched_words.end());
-
-    return { matched_words, documents_.at(document_id).status };
-}
-
-inline SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::execution::parallel_policy& par, const std::string_view raw_query, int document_id) const
-{
-    if (document_ids_.count(document_id) == 0) {
         using namespace std::literals::string_literals;
         throw std::out_of_range("document_id incorrect!"s);
     }
-    //const auto query = std::move(ParseQuery(par, raw_query));
-    const auto query = std::move(ParseQuery(raw_query, false));
+    const auto query = std::move(ParseQuery(*exec_policy, raw_query));
 
-    //std::set<std::string_view> mns{ query.minus_words.begin(),query.minus_words.end() };
-    //if (std::find_if(
-    //    par,
-    //    mns.begin(), mns.end(),
-    //    [&](const auto& word) {
-    //        return doc_id_to_words_freqs_.at(document_id).count(word); }
-    //) != mns.end()) {
-    //    return { {}, documents_.at(document_id).status };
-    //}
-    //Так вроде бы, быстрее:
-    if (std::any_of(par, std::make_move_iterator(query.minus_words.begin()), std::make_move_iterator(query.minus_words.end()),
+    if (std::any_of(*exec_policy, std::make_move_iterator(query.minus_words.begin()), std::make_move_iterator(query.minus_words.end()),
         [this, document_id](const auto& word) {
             return doc_id_to_words_freqs_.at(document_id).count(word);
         })) {
@@ -226,16 +148,46 @@ inline SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::
     }
 
     std::vector<std::string_view> matched_words(query.plus_words.size());
-    auto last = std::copy_if(par, std::make_move_iterator(query.plus_words.begin()), std::make_move_iterator(query.plus_words.end()),
+    auto last = std::copy_if(*exec_policy, std::make_move_iterator(query.plus_words.begin()), std::make_move_iterator(query.plus_words.end()),
         matched_words.begin(),
         [this, document_id](const auto& word) {
             return doc_id_to_words_freqs_.at(document_id).count(word);
         });
-    std::sort(par, matched_words.begin(), last);
-    auto it = std::unique(par, matched_words.begin(), last);
+    std::sort(*exec_policy, matched_words.begin(), last);
+    auto it = std::unique(*exec_policy, matched_words.begin(), last);
     matched_words.erase(it, matched_words.end());
 
     return { matched_words, documents_.at(document_id).status };
+}
+
+template<typename ExecutionPolicy>
+inline SearchServer::Query SearchServer::ParseQuery(const ExecutionPolicy&& exec_policy, const std::string_view text) const {
+
+    Query result;
+
+    std::vector<std::string_view> words = SplitIntoWords(text);
+    result.minus_words.reserve(words.size());
+    result.plus_words.reserve(words.size());
+
+    for (const auto& word : words) {
+        const auto& query_word = ParseQueryWord(word);
+        if (!query_word.is_stop) {
+            if (query_word.is_minus) {
+                result.minus_words.push_back(query_word.data);
+            }
+            else {
+                result.plus_words.push_back(query_word.data);
+            }
+        }
+    }
+
+    std::sort(*exec_policy, result.minus_words.begin(), result.minus_words.end());
+    result.minus_words.erase(std::unique(result.minus_words.begin(), result.minus_words.end()), result.minus_words.end());
+
+    std::sort(*exec_policy, result.plus_words.begin(), result.plus_words.end());
+    result.plus_words.erase(std::unique(result.plus_words.begin(), result.plus_words.end()), result.plus_words.end());
+
+    return result;
 }
 
 template <typename StringContainer>
@@ -296,7 +248,6 @@ std::vector<Document> SearchServer::FindTopDocuments(ExecutionPolicy&& exec_poli
 template <typename ExecutionPolicy, class DocumentPredicate>
 std::vector<Document> SearchServer::FindAllDocuments(ExecutionPolicy&& exec_policy, const Query& query, DocumentPredicate document_predicate) const {
     ConcurrentMap<int, double> document_to_relevance(6);
-    //std::map<int, double> document_to_relevance;
 
     const auto plus_word_checker =
         [this, &document_predicate, &document_to_relevance](std::string_view word) {
@@ -308,7 +259,6 @@ std::vector<Document> SearchServer::FindAllDocuments(ExecutionPolicy&& exec_poli
             const auto& document_data = documents_.at(document_id);
             if (document_predicate(document_id, document_data.status, document_data.rating)) {
                 document_to_relevance[document_id].ref_to_value += static_cast<double>(term_freq * inverse_document_freq);
-                //document_to_relevance[document_id] += static_cast<double>(term_freq * inverse_document_freq);
             }
         }
     };
@@ -321,17 +271,14 @@ std::vector<Document> SearchServer::FindAllDocuments(ExecutionPolicy&& exec_poli
         }
         for (const auto [document_id, _] : word_to_document_freqs_.at(word)) {
             document_to_relevance.Erase(document_id);
-            //document_to_relevance.erase(document_id);
         }
     };
     std::for_each(exec_policy, query.minus_words.begin(), query.minus_words.end(), minus_word_checker);
 
     std::map<int, double> m_doc_to_relevance = document_to_relevance.BuildOrdinaryMap();
-    //
 
     std::vector<Document> matched_documents;
     for (const auto [document_id, relevance] : m_doc_to_relevance) {
-    //for (const auto [document_id, relevance] : document_to_relevance) {
         matched_documents.push_back({ document_id, relevance, documents_.at(document_id).rating });
     }
     return matched_documents;

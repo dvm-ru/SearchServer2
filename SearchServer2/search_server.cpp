@@ -30,6 +30,18 @@ void SearchServer::AddDocument(int document_id, const std::string_view document,
     }
 }
 
+SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::string_view raw_query, int document_id) const {
+    return MatchDocument(std::execution::seq, raw_query, document_id);
+}
+
+SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::execution::sequenced_policy& policy, const std::string_view raw_query, int document_id) const {
+    return MatchDocument(&policy, raw_query, document_id);
+}
+
+SearchServer::MatchDocumentResult SearchServer::MatchDocument(const std::execution::parallel_policy& policy, const std::string_view raw_query, int document_id) const {
+    return MatchDocument(&policy, raw_query, document_id);
+}
+
 std::vector<Document> SearchServer::FindTopDocuments(const std::string_view raw_query, DocumentStatus status) const {
     return FindTopDocuments(raw_query, [&status](int document_id, DocumentStatus document_status, int rating) {
         return document_status == status;
@@ -91,29 +103,19 @@ void SearchServer::RemoveDocument(const std::execution::parallel_policy& police,
     if (!documents_.count(document_id)) return;
     const auto& word_freqs = doc_id_to_words_freqs_.at(document_id);
     std::vector<std::string_view> words(word_freqs.size());
-    //std::vector<std::string_view> words;
-    //words.reserve(word_freqs.size());
-    //std::transform(
-    //    std::execution::par,
-    //    word_freqs.begin(), word_freqs.end(),
-    //    words.begin(),
-    //    [](const auto& item) {
-    //        return std::move(item.first);/*std::move remove, but not clear why. with it faster*/
-    //    }
-    //);
     std::transform(
         std::execution::par,
         word_freqs.begin(), word_freqs.end(),
         words.begin(),
         [](const auto& item) { return item.first; }
     );
-    //std::mutex m;
+    std::mutex m;
     std::for_each(
         std::execution::par,
         words.begin(), words.end(),
-        [//&m, 
+        [&m, 
         this, &document_id](const auto& word) {
-            //std::lock_guard<std::mutex> guard(m);
+            std::lock_guard<std::mutex> guard(m);
             if (word_to_document_freqs_.count(word)){
                 word_to_document_freqs_.at(word).erase(document_id);
             }
@@ -153,34 +155,16 @@ SearchServer::QueryWord SearchServer::ParseQueryWord(std::string_view text) cons
     return { text, is_minus, IsStopWord(text) };
 }
 
-SearchServer::Query SearchServer::ParseQuery(std::string_view text, const bool sort) const {
+SearchServer::Query SearchServer::ParseQuery(const std::string_view text) const {
+    return ParseQuery(std::execution::seq, text);
+}
 
-    Query result;
+SearchServer::Query SearchServer::ParseQuery(const std::execution::sequenced_policy& policy, const std::string_view text) const {
+    return ParseQuery(&policy, text);
+}
 
-    std::vector<std::string_view> words = SplitIntoWords(text);
-	result.minus_words.reserve(words.size());
-	result.plus_words.reserve(words.size());
-
-    for (const auto& word : words) {
-        const auto& query_word = ParseQueryWord(word);
-        if (!query_word.is_stop) {
-            if (query_word.is_minus) {
-                result.minus_words.push_back(query_word.data);
-            }
-            else {
-                result.plus_words.push_back(query_word.data);
-            }
-        }
-    }
-    if (sort == true) {
-        std::sort(result.minus_words.begin(), result.minus_words.end());
-        result.minus_words.erase(std::unique(result.minus_words.begin(), result.minus_words.end()), result.minus_words.end());
-
-        std::sort(result.plus_words.begin(), result.plus_words.end());
-        result.plus_words.erase(std::unique(result.plus_words.begin(), result.plus_words.end()), result.plus_words.end());
-
-    }
-    return result;
+SearchServer::Query SearchServer::ParseQuery(const std::execution::parallel_policy& policy, const std::string_view text) const {
+    return ParseQuery(&policy, text);
 }
 
 double SearchServer::ComputeWordInverseDocumentFreq(const std::string_view word) const {
